@@ -31,9 +31,14 @@ helpmenu = Menu(menubar,tearoff=0)
 menubar.add_cascade(label='Help',menu=helpmenu)
 helpmenu.add_command(label='About',command=About)
 
+
+# donate fuction
+def Donate():
+        messagebox.showinfo('Donate','BTC Address : 46132196163516')
 ##### Donate Menu
 donatemenu = Menu(menubar,tearoff=0)
 menubar.add_cascade(label='Donate',menu=donatemenu)
+donatemenu.add_command(label='Donate',command=Donate)
 
 
 Tab = ttk.Notebook(GUI) # เพิ่ม tab # notebook มาจาก ttk
