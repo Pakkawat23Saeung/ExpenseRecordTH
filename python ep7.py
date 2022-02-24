@@ -1,14 +1,28 @@
 # GUIbasic2-expense.py
+from asyncio import events
 from this import d
 from tkinter import *
 from tkinter import ttk, messagebox
 from datetime import datetime
 import csv
+from turtle import right
 # ttk = theme of Tk
 
 GUI = Tk ()
 GUI.title('โปรแกรมบันทึกค่าใช้จ่าย')
-GUI.geometry('800x700+100+0')
+# GUI.geometry('800x700+100+0')
+
+w = 720
+h = 700
+
+ws = GUI.winfo_screenwidth() # screen width
+hs = GUI.winfo_screenheight() # screen height
+
+
+x = (ws/2) - (w/2)
+y = (hs/2) - (h/2) - 100
+
+GUI.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
 
 #  B1 = ttk.Button(GUI,text='Hello')
 #  B1.pack(ipadx=50,ipady=20) #.pack() ติดปุ่มเข้ากับ GUI หลัก
@@ -86,8 +100,8 @@ def Save(event=None):
                 total = float(price) * float(number) 
                 
                 # .get() คือดึงค่ามาจาก v_expense = StringVar () 
-                print('รายการ: {} จำนวน :{} ราคา :{} ราคารวมทั้งหมด {}:'.format(expense,number,price,total))
-                text = ('รายการ: {} จำนวน :{} \nราคา :{} ราคารวมทั้งหมด {}:'.format(expense,number,price,total))
+                print('รายการ: {} จำนวน :{} ราคา :{} ราคารวมทั้งหมด:{}'.format(expense,number,price,total))
+                text = ('รายการ: {} จำนวน :{} \nราคา :{} ราคารวมทั้งหมด:{}'.format(expense,number,price,total))
                 v_result.set(text)
                
                 # clear ข้อมูลเก่า
@@ -241,6 +255,93 @@ def update_table():
 	except Exception as e:
 		print('No File')
 		print('ERROR:',e)
+
+#######Right Click Menu#######
+def EditRecord():
+        POPUP = Toplevel() #
+        POPUP.title('Edit Record')
+        #POPUP.geometry('500x400')
+        w = 500
+        h = 400
+
+        ws = POPUP.winfo_screenwidth() # screen width
+        hs = POPUP.winfo_screenheight() # screen height
+
+
+        x = (ws/2) - (w/2)
+        y = (hs/2) - (h/2) - 100
+
+        POPUP.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
+        #-----text1-----
+        L = ttk.Label(POPUP,text='รายการค่าใช้จ่าย',font=FONT1).pack()
+        v_expense = StringVar()
+        # StringVar () คือตัวแปรพิเศษสำหรับเก็บข้อมูลใน GUI
+        E1 = ttk.Entry(POPUP,textvariable = v_expense,font=FONT1)
+        E1.pack()
+        #-----------------
+
+        #-----text2-----
+        L = ttk.Label(POPUP,text='จำนวน',font=FONT1).pack()
+        v_count = StringVar()
+        # StringVar () คือตัวแปรพิเศษสำหรับเก็บข้อมูลใน GUI
+        E2 = ttk.Entry(POPUP,textvariable = v_count,font=FONT1) #Entry คือช่องกรอกข้อมูล ไว้กรอก input
+        E2.pack()
+        #-----------------
+
+        #-----text3-----
+        L = ttk.Label(POPUP,text='ราคา(บาท)',font=FONT1).pack()
+        v_price = StringVar()
+        # StringVar () คือตัวแปรพิเศษสำหรับเก็บข้อมูลใน GUI
+        E3 = ttk.Entry(POPUP,textvariable = v_price,font=FONT1) #Entry คือช่องกรอกข้อมูล ไว้กรอก input
+        E3.pack()
+        #-----------------
+
+        def Edit():
+              # print(transactionid)
+              # print(alltransaction)
+                olddata = alltransaction[str(transactionid)]
+                print('OLD',olddata)
+                v1 = v_expense.get()
+                v2 = float(v_count.get())
+                v3 = float(v_price.get())
+                total = v2*v3
+                newdata = [olddata[0],olddata[1],v1,v2,v3,total]
+                alltransaction[str(transactionid)] = newdata
+                UpdateCSV()
+                update_table()
+                POPUP.destroy() #สั่งปิดpopup
+
+        sv_bt = PhotoImage(file='save.png').subsample(9) #ใส่รูปภาพพื้นหลัง
+
+        B1 = ttk.Button(POPUP,text=f'{"Save":>15}',image=sv_bt,compound='left',command=Edit)
+        B1.pack (ipadx=50,ipady=20,pady=20)
+
+        # get data in selected record
+        select = resulttable.selection()
+        print(select)
+        data = resulttable.item(select)
+        data = data['values']
+        print(data)
+        transactionid = data[0]
+
+        #สั่งเซ็ตค่าเก่าไว้ตรงช่องกรอก
+        v_expense.set(data[2]) 
+        v_count.set(data[3])
+        v_price.set(data[4])
+
+
+        POPUP.mainloop()
+
+
+rightclick = Menu(GUI,tearoff=0)
+rightclick.add_command(label='Edit',command=EditRecord)
+rightclick.add_command(label='Delete',command=DeleteRecord)
+
+def menupopup(event):
+        #print(event.x_root,event.y_root)
+        rightclick.post(event.x_root,event.y_root)
+
+resulttable.bind('<Button-3>',menupopup)
 
 
 update_table()
